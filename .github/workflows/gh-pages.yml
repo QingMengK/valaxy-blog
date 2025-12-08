@@ -8,50 +8,37 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # If your repository depends on submodule, please see: https://github.com/actions/checkout
-          submodules: recursive
+          version: 8
 
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20.18.0"
+          node-version: 20
+          cache: pnpm
 
-      - name: Cache NPM dependencies
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: ${{ runner.OS }}-npm-cache
-          restore-keys: |
-            ${{ runner.OS }}-npm-cache
+      - name: Install dependencies
+        run: pnpm install
 
-      - name: Install Dependencies
-        run: npm install
+      - name: Build
+        run: pnpm run build
 
-      - name: Build Valaxy
-        run: npm run build
-
-      - name: Upload Pages artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.valaxy/dist   # ⚠ Valaxy 的输出目录，与你原来的 public 不同
+          path: ./public
 
   deploy:
     needs: build
     permissions:
       pages: write
       id-token: write
-
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
-        id: deployment
         uses: actions/deploy-pages@v4
