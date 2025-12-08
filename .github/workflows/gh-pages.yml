@@ -1,38 +1,38 @@
-name: GitHub Pages
+name: Deploy Valaxy Blog
 
 on:
   push:
     branches:
-      - master
+      - main    # 如果你的默认分支是 master，请改成 master
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-        os: [ubuntu-latest]
-      fail-fast: false
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          registry-url: https://registry.npmjs.org/
+          node-version: 20
 
-      - name: 📦 Install Dependencies
-        run: npm i
+      - name: Install Dependencies
+        run: npm install
 
-      - name: 🌌 Build Valaxy Blog
+      - name: Build Valaxy
         run: npm run build
 
-      - name: 🪤 Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+          path: .valaxy/dist   # ← Valaxy 输出路径 ★
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    uses: actions/deploy-pages@v4
