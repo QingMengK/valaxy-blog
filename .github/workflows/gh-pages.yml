@@ -30,10 +30,10 @@ jobs:
             ${{ runner.OS }}-npm-cache
 
       - name: Install Dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Build Valaxy
-        run: pnpm run build
+        run: npm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
